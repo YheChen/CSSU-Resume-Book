@@ -19,7 +19,7 @@ export default function Home() {
             Student Sign Up
           </button>
           <button className="bg-white text-black font-medium px-6 py-2 rounded hover:bg-gray-200 transition">
-            Sponsor Access
+            Become a Sponsor
           </button>
         </div>
       </section>
@@ -63,7 +63,7 @@ export default function Home() {
               ))}
             </ul>
             <button className="mt-6 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition">
-              Sponsor Login
+              Become a Sponsor
             </button>
           </div>
         </div>
