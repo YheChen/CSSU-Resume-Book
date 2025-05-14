@@ -9,11 +9,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-20 px-4 bg-gradient-to-b from-black to-gray-800 text-white">
         <h2 className="text-4xl sm:text-5xl font-bold max-w-3xl">
-          University of Toronto Computer Science Student Union
+          UTSG CSSU Resume Book
         </h2>
         <p className="mt-4 text-lg max-w-xl">
-          Connect talented UofT Computer Science students with industry-leading
-          companies through our resume portal.
+          Connecting talented UofT Computer Science students with
+          industry-leading companies through our resume portal.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
           <Link href="/signup">
