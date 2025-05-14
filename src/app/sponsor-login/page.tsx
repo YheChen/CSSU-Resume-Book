@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SponsorLoginPage() {
   const router = useRouter();
@@ -70,6 +71,12 @@ export default function SponsorLoginPage() {
         >
           Sign In
         </button>
+        <Link
+          href="/sponsor-register"
+          className="text-sm text-black hover:underline mt-4 block text-center"
+        >
+          Become a Sponsor
+        </Link>
       </form>
     </main>
   );
