@@ -11,9 +11,11 @@ export default function Navbar() {
             Student Login
           </button>
         </Link>
-        <button className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition">
-          Sponsor Login
-        </button>
+        <Link href="/sponsor-login">
+          <button className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition">
+            Sponsor Login
+          </button>
+        </Link>
       </div>
     </nav>
   );

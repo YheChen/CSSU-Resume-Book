@@ -16,12 +16,16 @@ export default function Home() {
           companies through our resume portal.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <button className="bg-white text-black font-medium px-6 py-2 rounded hover:bg-gray-200 transition">
-            Student Sign Up
-          </button>
-          <button className="bg-white text-black font-medium px-6 py-2 rounded hover:bg-gray-200 transition">
-            Become a Sponsor
-          </button>
+          <Link href="/signup">
+            <button className="bg-white text-black font-medium px-6 py-2 rounded hover:bg-gray-200 transition">
+              Student Sign Up
+            </button>
+          </Link>
+          <Link href="/sponsor-register">
+            <button className="bg-white text-black font-medium px-6 py-2 rounded hover:bg-gray-200 transition">
+              Become a Sponsor
+            </button>
+          </Link>
         </div>
       </section>
 
@@ -65,9 +69,11 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <button className="mt-6 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition">
-              Become a Sponsor
-            </button>
+            <Link href="/sponsor-register">
+              <button className="mt-6 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition">
+                Become a Sponsor
+              </button>
+            </Link>
           </div>
         </div>
       </section>
