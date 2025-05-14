@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -42,9 +43,11 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <button className="mt-6 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition">
-              Sign Up Now
-            </button>
+            <Link href="/signup">
+              <button className="mt-6 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition">
+                Student Sign Up
+              </button>
+            </Link>
           </div>
 
           {/* Sponsors */}
