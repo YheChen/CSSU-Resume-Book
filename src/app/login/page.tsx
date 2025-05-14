@@ -81,7 +81,7 @@ export default function LoginPage() {
           href="/signup"
           className="text-sm text-black hover:underline mt-4 block text-center"
         >
-          Don't have an account? Sign up
+          Don&apos;t have an account? Sign up
         </Link>
         <Link
           href="/forgot-password"
