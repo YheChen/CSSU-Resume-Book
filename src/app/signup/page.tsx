@@ -112,6 +112,12 @@ export default function SignupPage() {
         >
           Create Account
         </button>
+        <Link
+          href="/login"
+          className="text-sm text-black hover:underline mt-4 block text-center"
+        >
+          Have an account already? Login
+        </Link>
         <Link href="/">
           <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
             ← Return to Home
