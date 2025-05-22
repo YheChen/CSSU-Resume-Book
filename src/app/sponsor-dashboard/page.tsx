@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SponsorDashboardPage() {
   const router = useRouter();
@@ -24,6 +25,11 @@ export default function SponsorDashboardPage() {
       >
         Logout
       </button>
+      <Link href="/">
+        <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+          ← Return to Home
+        </button>
+      </Link>
     </main>
   );
 }

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import Link from "next/link";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,7 +22,7 @@ export default function SignupPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const uoftEmailPattern = /^[a-zA-Z0-9._%+-]+@mail\.utoronto\.ca$/;
@@ -40,10 +43,17 @@ export default function SignupPage() {
     }
 
     setError("");
-    // TODO: Add actual signup logic here
 
-    // Simulate successful signup
-    router.push("/dashboard");
+    try {
+      await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong during signup.");
+    }
   };
 
   return (
@@ -102,6 +112,11 @@ export default function SignupPage() {
         >
           Create Account
         </button>
+        <Link href="/">
+          <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+            ← Return to Home
+          </button>
+        </Link>
       </form>
     </main>
   );

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SponsorRegisterPage() {
   return (
     <main className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
@@ -19,6 +21,11 @@ export default function SponsorRegisterPage() {
         >
           View Sponsorship Package
         </a>
+        <Link href="/">
+          <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+            ← Return to Home
+          </button>
+        </Link>
       </div>
     </main>
   );

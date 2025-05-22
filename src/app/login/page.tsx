@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +20,7 @@ export default function LoginPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const uoftEmailPattern = /^[a-zA-Z0-9._%+-]+@mail\.utoronto\.ca$/;
@@ -34,11 +36,13 @@ export default function LoginPage() {
     }
 
     setError("");
-    // TODO: Authenticate with backend
-    console.log("Logging in with", formData);
 
-    // Simulate successful login
-    router.push("/dashboard");
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError("Invalid email or password.");
+    }
   };
 
   return (
@@ -88,6 +92,11 @@ export default function LoginPage() {
           className="text-sm text-black hover:underline mt-2 block text-center"
         >
           Forgot Password?
+        </Link>
+        <Link href="/">
+          <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+            ← Return to Home
+          </button>
         </Link>
       </form>
     </main>
