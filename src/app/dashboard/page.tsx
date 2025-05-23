@@ -20,9 +20,9 @@ export default function DashboardPage() {
     github: "",
     website: "",
     intro: "",
-    resume_url: "",
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [status, setStatus] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,12 +37,18 @@ export default function DashboardPage() {
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("*")
+          .select(
+            "name, contactEmail, phone, program, year, linkedin, github, website, intro, resume_url"
+          )
           .eq("id", user.id)
           .single();
 
         if (error) throw error;
-        if (data) setForm((prev) => ({ ...prev, ...data }));
+        if (data) {
+          const { resume_url, ...rest } = data;
+          setForm((prev) => ({ ...prev, ...rest }));
+          if (resume_url) setResumeUrl(resume_url);
+        }
       } catch (err) {
         console.error("Error fetching profile:", err);
       }
@@ -61,12 +67,12 @@ export default function DashboardPage() {
 
   const handleSave = async () => {
     if (!user) {
-      setStatus("❌ Upload failed: user is not authenticated.");
+      setStatus("❌ Save failed: user is not authenticated.");
       console.error("Missing Supabase user");
       return;
     }
 
-    const validationErrors = [];
+    const validationErrors: string[] = [];
     if (!form.name.trim()) validationErrors.push("Name is required.");
     if (!form.contactEmail.trim())
       validationErrors.push("Preferred contact email is required.");
@@ -81,10 +87,6 @@ export default function DashboardPage() {
       }
     }
 
-    if (!form.resume_url && !resumeFile) {
-      validationErrors.push("Resume upload is required.");
-    }
-
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setStatus("");
@@ -93,36 +95,33 @@ export default function DashboardPage() {
 
     try {
       setIsSaving(true);
-      setStatus("Uploading resume and saving profile...");
+      setStatus("Uploading resume (if any) and saving profile...");
 
+      let uploadedUrl = resumeUrl;
       if (resumeFile) {
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from("resumes")
           .upload(`${user.id}/resume.pdf`, resumeFile, {
             upsert: true,
-            cacheControl: "3600",
-            contentType: "application/pdf",
           });
-
         if (error) throw error;
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage
+        const { data: publicData } = supabase.storage
           .from("resumes")
           .getPublicUrl(`${user.id}/resume.pdf`);
-
-        form.resume_url = publicUrl;
+        uploadedUrl = publicData.publicUrl;
+        setResumeUrl(uploadedUrl);
       }
 
       const { error: dbError } = await supabase.from("profiles").upsert({
         id: user.id,
         ...form,
+        resume_url: uploadedUrl,
       });
 
       if (dbError) throw dbError;
 
-      setStatus("✅ Profile and resume saved successfully.");
+      setStatus("✅ Profile saved successfully.");
       setErrors([]);
     } catch (err: any) {
       console.error("Save failed:", err);
@@ -254,15 +253,14 @@ export default function DashboardPage() {
           className="mb-3"
         />
 
-        {form.resume_url && (
-          <a
-            href={form.resume_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm text-blue-600 hover:underline text-center"
-          >
-            View Uploaded Resume
-          </a>
+        {resumeUrl && (
+          <div className="mb-4">
+            <iframe
+              src={resumeUrl}
+              className="w-full h-64 border"
+              title="Uploaded Resume"
+            />
+          </div>
         )}
 
         <button
@@ -270,7 +268,7 @@ export default function DashboardPage() {
           className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-4 disabled:opacity-50"
           disabled={isSaving}
         >
-          {isSaving ? "Saving..." : "Save Profile & Upload Resume"}
+          {isSaving ? "Saving..." : "Save Profile"}
         </button>
 
         {status && <p className="mt-4 text-sm text-blue-600">{status}</p>}
