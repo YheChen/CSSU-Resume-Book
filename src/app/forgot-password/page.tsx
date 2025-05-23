@@ -1,33 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    console.log("Trying to send reset email to:", email);
-
     if (!email.endsWith("@mail.utoronto.ca")) {
       setError("Please enter a valid @mail.utoronto.ca email.");
       return;
     }
 
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage("Password reset email sent. Please check your inbox.");
-    } catch (err: any) {
-      console.error("Reset error:", err);
-      setError(err.message || "Failed to send reset email.");
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setMessage("A password reset link has been sent to your email.");
     }
   };
 
@@ -47,20 +49,23 @@ export default function ForgotPasswordPage() {
             className="w-full mb-4 px-4 py-2 border rounded"
             required
           />
-          {message && <p className="mt-4 text-green-600 text-sm">{message}</p>}
-          {error && <p className="mt-4 text-red-600 text-sm">{error}</p>}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
           >
-            Send Reset Link
+            {loading ? "Sending..." : "Send Reset Link"}
           </button>
-          <Link href="/">
-            <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
-              ← Return to Home
-            </button>
-          </Link>
         </form>
+
+        {message && <p className="mt-4 text-green-600 text-sm">{message}</p>}
+        {error && <p className="mt-4 text-red-600 text-sm">{error}</p>}
+
+        <Link href="/">
+          <button className="w-full mt-6 bg-black text-white py-2 rounded hover:bg-gray-800 transition">
+            ← Return to Home
+          </button>
+        </Link>
       </div>
     </main>
   );

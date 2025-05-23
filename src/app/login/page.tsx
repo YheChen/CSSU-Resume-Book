@@ -2,19 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,26 +20,25 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const uoftEmailPattern = /^[a-zA-Z0-9._%+-]+@mail\.utoronto\.ca$/;
-
-    if (!uoftEmailPattern.test(formData.email)) {
-      setError("Please enter your @mail.utoronto.ca email.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
     setError("");
+    setIsSubmitting(true);
+
+    const { email, password } = formData;
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
       router.push("/dashboard");
     } catch (err: any) {
-      setError("Invalid email or password.");
+      console.error("Login error:", err);
+      setError(err.message || "Unexpected login error.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -51,7 +48,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded shadow-md w-full max-w-md"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
 
         <input
           type="email"
@@ -77,24 +74,26 @@ export default function LoginPage() {
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
         >
-          Sign In
+          {isSubmitting ? "Signing in..." : "Login"}
         </button>
-        <Link
-          href="/signup"
-          className="text-sm text-black hover:underline mt-4 block text-center"
-        >
-          Don&apos;t have an account? Sign up
+
+        <Link href="/forgot-password">
+          <button
+            type="button"
+            className="w-full mt-4 text-sm text-blue-600 hover:underline"
+          >
+            Forgot Password?
+          </button>
         </Link>
-        <Link
-          href="/forgot-password"
-          className="text-sm text-black hover:underline mt-2 block text-center"
-        >
-          Forgot Password?
-        </Link>
+
         <Link href="/">
-          <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+          <button
+            type="button"
+            className="w-full mt-2 bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+          >
             ← Return to Home
           </button>
         </Link>

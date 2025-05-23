@@ -3,10 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { signOut } from "firebase/auth";
-import { auth, db, storage } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -38,11 +35,14 @@ export default function DashboardPage() {
 
     const fetchProfile = async () => {
       try {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setForm((prev) => ({ ...prev, ...docSnap.data() }));
-        }
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+        if (data) setForm((prev) => ({ ...prev, ...data }));
       } catch (err) {
         console.error("Error fetching profile:", err);
       }
@@ -60,9 +60,9 @@ export default function DashboardPage() {
   };
 
   const handleSave = async () => {
-    if (!user || !auth.currentUser) {
+    if (!user) {
       setStatus("❌ Upload failed: user is not authenticated.");
-      console.error("Missing Firebase auth.currentUser");
+      console.error("Missing Supabase user");
       return;
     }
 
@@ -96,49 +96,36 @@ export default function DashboardPage() {
       setStatus("Uploading resume and saving profile...");
 
       if (resumeFile) {
-        const fileRef = ref(storage, `resumes/${user.uid}.pdf`);
-        const uploadTask = uploadBytesResumable(fileRef, resumeFile);
+        const { data, error: uploadError } = await supabase.storage
+          .from("resumes")
+          .upload(`${user.id}/resume.pdf`, resumeFile, {
+            upsert: true,
+            contentType: "application/pdf",
+          });
 
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setStatus(`Uploading... ${progress.toFixed(0)}%`);
-            },
-            (error) => {
-              console.error("Upload failed:", error);
-              reject(error);
-            },
-            async () => {
-              const url = await getDownloadURL(uploadTask.snapshot.ref);
-              form.resumeURL = url;
-              resolve();
-            }
-          );
-        });
+        if (uploadError) throw uploadError;
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage
+          .from("resumes")
+          .getPublicUrl(`${user.id}/resume.pdf`);
+
+        form.resumeURL = publicUrl;
       }
 
-      await setDoc(doc(db, "users", user.uid), form, { merge: true });
+      const { error: dbError } = await supabase.from("profiles").upsert({
+        id: user.id,
+        ...form,
+      });
+
+      if (dbError) throw dbError;
+
       setStatus("✅ Profile and resume saved successfully.");
       setErrors([]);
     } catch (err: any) {
       console.error("Save failed:", err);
-      if (err.code === "storage/retry-limit-exceeded") {
-        setStatus(
-          "❌ Upload failed: retry limit exceeded. Please check your internet connection or try a smaller file."
-        );
-      } else if (
-        err.code === "storage/unauthorized" ||
-        err.code === "permission-denied"
-      ) {
-        setStatus(
-          "❌ Upload failed: you don't have permission to upload. Check Firebase Storage rules."
-        );
-      } else {
-        setStatus(`❌ Unexpected error: ${err.message || "Unknown error"}`);
-      }
+      setStatus(`❌ ${err.message || "Unexpected error"}`);
     } finally {
       setIsSaving(false);
     }
