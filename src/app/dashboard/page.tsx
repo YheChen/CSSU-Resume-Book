@@ -47,7 +47,17 @@ export default function DashboardPage() {
         if (data) {
           const { resume_url, ...rest } = data;
           setForm((prev) => ({ ...prev, ...rest }));
-          if (resume_url) setResumeUrl(resume_url);
+          if (resume_url) {
+            // Generate signed URL for private bucket
+            const { data: signed, error: signErr } = await supabase.storage
+              .from("resumes")
+              .createSignedUrl(`${user.id}/resume.pdf`, 60);
+            if (signErr) {
+              console.error("Failed to generate signed URL", signErr);
+            } else {
+              setResumeUrl(signed.signedUrl);
+            }
+          }
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -99,17 +109,20 @@ export default function DashboardPage() {
 
       let uploadedUrl = resumeUrl;
       if (resumeFile) {
-        const { error } = await supabase.storage
+        const { error: uploadErr } = await supabase.storage
           .from("resumes")
           .upload(`${user.id}/resume.pdf`, resumeFile, {
             upsert: true,
+            contentType: "application/pdf",
           });
-        if (error) throw error;
+        if (uploadErr) throw uploadErr;
 
-        const { data: publicData } = supabase.storage
+        const { data: signed, error: signErr } = await supabase.storage
           .from("resumes")
-          .getPublicUrl(`${user.id}/resume.pdf`);
-        uploadedUrl = publicData.publicUrl;
+          .createSignedUrl(`${user.id}/resume.pdf`, 60);
+        if (signErr) throw signErr;
+
+        uploadedUrl = signed.signedUrl;
         setResumeUrl(uploadedUrl);
       }
 
@@ -253,6 +266,7 @@ export default function DashboardPage() {
           className="mb-3"
         />
 
+        {/* Embed PDF Viewer */}
         {resumeUrl && (
           <div className="mb-4">
             <iframe
