@@ -20,7 +20,7 @@ export default function DashboardPage() {
     github: "",
     website: "",
     intro: "",
-    resumeURL: "",
+    resume_url: "",
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
@@ -81,7 +81,7 @@ export default function DashboardPage() {
       }
     }
 
-    if (!form.resumeURL && !resumeFile) {
+    if (!form.resume_url && !resumeFile) {
       validationErrors.push("Resume upload is required.");
     }
 
@@ -96,14 +96,15 @@ export default function DashboardPage() {
       setStatus("Uploading resume and saving profile...");
 
       if (resumeFile) {
-        const { data, error: uploadError } = await supabase.storage
+        const { data, error } = await supabase.storage
           .from("resumes")
           .upload(`${user.id}/resume.pdf`, resumeFile, {
             upsert: true,
+            cacheControl: "3600",
             contentType: "application/pdf",
           });
 
-        if (uploadError) throw uploadError;
+        if (error) throw error;
 
         const {
           data: { publicUrl },
@@ -111,7 +112,7 @@ export default function DashboardPage() {
           .from("resumes")
           .getPublicUrl(`${user.id}/resume.pdf`);
 
-        form.resumeURL = publicUrl;
+        form.resume_url = publicUrl;
       }
 
       const { error: dbError } = await supabase.from("profiles").upsert({
@@ -133,7 +134,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
       router.push("/");
     } catch (err) {
       console.error("Error logging out:", err);
@@ -253,9 +254,9 @@ export default function DashboardPage() {
           className="mb-3"
         />
 
-        {form.resumeURL && (
+        {form.resume_url && (
           <a
-            href={form.resumeURL}
+            href={form.resume_url}
             target="_blank"
             rel="noopener noreferrer"
             className="block text-sm text-blue-600 hover:underline text-center"
