@@ -14,14 +14,24 @@ export default function SignupPage() {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmailExists] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+  const checkEmail = async (email: string) => {
+    const res = await fetch("/api/check-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    return json.exists as boolean;
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setEmailExists(false);
 
     const { email, password, confirmPassword } = formData;
 
@@ -39,7 +49,11 @@ export default function SignupPage() {
       setError("Passwords do not match.");
       return;
     }
-
+    if (await checkEmail(formData.email)) {
+      setEmailExists(true);
+      setError("This email is already registered. Please log in instead.");
+      return;
+    }
     try {
       setIsSubmitting(true);
       const { error: signUpError } = await supabase.auth.signUp({
