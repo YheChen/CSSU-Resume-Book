@@ -108,7 +108,7 @@ export default function ResumeTable({ students }: Props) {
                 <td colSpan={9} className="p-0 border-t-0">
                   <iframe
                     src={s.resumeUrl}
-                    className="w-full h-96"
+                    className="w-full h-[calc(100vh-210px)]"
                     title={`Resume for ${s.name}`}
                   />
                 </td>
