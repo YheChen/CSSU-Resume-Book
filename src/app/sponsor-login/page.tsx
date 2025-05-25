@@ -6,33 +6,31 @@ import Link from "next/link";
 
 export default function SponsorLoginPage() {
   const router = useRouter();
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.email.endsWith("@mail.utoronto.ca")) {
-      setError("Please use a valid @mail.utoronto.ca email.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
     setError("");
-    // TODO: Authenticate sponsor
-    router.push("/sponsor-dashboard");
+
+    // Call your App Router API route
+    const res = await fetch("/api/sponsor-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (res.ok) {
+      // Redirect to the protected dashboard
+      router.push("/sponsor-dashboard");
+    } else {
+      const body = await res.json();
+      setError(body.error || "Login failed");
+    }
   };
 
   return (
@@ -46,7 +44,7 @@ export default function SponsorLoginPage() {
         <input
           type="email"
           name="email"
-          placeholder="Username"
+          placeholder="you@mail.utoronto.ca"
           value={formData.email}
           onChange={handleChange}
           className="w-full mb-4 px-4 py-2 border rounded"
@@ -71,14 +69,19 @@ export default function SponsorLoginPage() {
         >
           Sign In
         </button>
+
         <Link
           href="/sponsor-register"
           className="text-sm text-black hover:underline mt-4 block text-center"
         >
           Become a Sponsor
         </Link>
-        <Link href="/">
-          <button className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition mt-6">
+
+        <Link href="/" className="block mt-6 text-center">
+          <button
+            type="button"
+            className="w-full bg-gray-200 text-black py-2 rounded hover:bg-gray-300 transition"
+          >
             ← Return to Home
           </button>
         </Link>
