@@ -44,7 +44,7 @@ export default function SponsorLoginPage() {
         <input
           type="email"
           name="email"
-          placeholder="you@mail.utoronto.ca"
+          placeholder="Username"
           value={formData.email}
           onChange={handleChange}
           className="w-full mb-4 px-4 py-2 border rounded"

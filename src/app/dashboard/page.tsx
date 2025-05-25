@@ -19,7 +19,6 @@ export default function DashboardPage() {
     linkedin: "",
     github: "",
     website: "",
-    intro: "",
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export default function DashboardPage() {
         const { data, error } = await supabase
           .from("profiles")
           .select(
-            "name, contactEmail, phone, program, year, linkedin, github, website, intro, resume_url"
+            "name, contactEmail, phone, program, year, linkedin, github, website, resume_url"
           )
           .eq("id", user.id)
           .single();
@@ -94,8 +93,8 @@ export default function DashboardPage() {
     if (resumeFile) {
       if (resumeFile.type !== "application/pdf") {
         validationErrors.push("Resume must be a PDF file.");
-      } else if (resumeFile.size > 2 * 1024 * 1024) {
-        validationErrors.push("Resume must be under 2MB.");
+      } else if (resumeFile.size > 1024 * 1024) {
+        validationErrors.push("Resume size must be under 1MB.");
       }
     }
 
@@ -247,15 +246,6 @@ export default function DashboardPage() {
           name="website"
           placeholder="Personal Website"
           value={form.website}
-          onChange={handleChange}
-          className="w-full mb-3 px-4 py-2 border rounded"
-        />
-
-        <textarea
-          name="intro"
-          placeholder="Brief Introduction (max 150 characters)"
-          maxLength={150}
-          value={form.intro}
           onChange={handleChange}
           className="w-full mb-3 px-4 py-2 border rounded"
         />

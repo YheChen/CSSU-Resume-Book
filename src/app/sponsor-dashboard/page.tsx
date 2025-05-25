@@ -9,6 +9,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const stripUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "");
+
 export default async function SponsorDashboard() {
   // 1. Auth check
   const cookieStore = await cookies();
@@ -24,9 +26,21 @@ export default async function SponsorDashboard() {
       "id, name, contactEmail, phone, program, year, linkedin, github, website"
     );
 
-  if (error) {
+  if (error || !students) {
     return <p className="p-8 text-red-600">Error: {error.message}</p>;
   }
+  const studentsWithResumes = await Promise.all(
+    students.map(async (s) => {
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from("resumes")
+        .createSignedUrl(`${s.id}/resume.pdf`, 60 * 60);
+
+      return {
+        ...s,
+        resumeUrl: urlError ? null : urlData?.signedUrl,
+      };
+    })
+  );
 
   return (
     <main className="p-8">
@@ -35,6 +49,7 @@ export default async function SponsorDashboard() {
       <table className="min-w-full border">
         <thead className="bg-gray-100">
           <tr>
+            <th className="py-2 px-4 border">Resume</th>
             <th className="py-2 px-4 border">Name</th>
             <th className="py-2 px-4 border">Email</th>
             <th className="py-2 px-4 border">Phone</th>
@@ -46,16 +61,71 @@ export default async function SponsorDashboard() {
           </tr>
         </thead>
         <tbody>
-          {students?.map((s) => (
+          {studentsWithResumes?.map((s) => (
             <tr key={s.id}>
+              <td className="py-2 px-4 border">
+                {s.resumeUrl ? (
+                  <a
+                    href={s.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View
+                  </a>
+                ) : (
+                  "No resume"
+                )}
+              </td>
               <td className="py-2 px-4 border">{s.name}</td>
               <td className="py-2 px-4 border">{s.contactEmail}</td>
               <td className="py-2 px-4 border">{s.phone}</td>
               <td className="py-2 px-4 border">{s.program}</td>
               <td className="py-2 px-4 border">{s.year}</td>
-              <td className="py-2 px-4 border">{s.linkedin}</td>
-              <td className="py-2 px-4 border">{s.github}</td>
-              <td className="py-2 px-4 border">{s.website}</td>
+              <td className="py-2 px-4 border">
+                {s.linkedin ? (
+                  <a
+                    href={s.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {stripUrl(s.linkedin)}
+                  </a>
+                ) : (
+                  "No LinkedIn"
+                )}
+              </td>
+
+              <td className="py-2 px-4 border">
+                {s.github ? (
+                  <a
+                    href={s.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {stripUrl(s.github)}
+                  </a>
+                ) : (
+                  "No GitHub"
+                )}
+              </td>
+
+              <td className="py-2 px-4 border">
+                {s.website ? (
+                  <a
+                    href={s.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {stripUrl(s.website)}
+                  </a>
+                ) : (
+                  "No Website"
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
