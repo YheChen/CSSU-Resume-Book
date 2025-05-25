@@ -15,6 +15,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmailExists] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -63,7 +64,7 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError;
 
-      router.push("/dashboard");
+      setSignupSuccess(true);
     } catch (err: any) {
       console.error("Signup error:", err);
       setError(err.message || "Unexpected signup error.");
@@ -79,46 +80,53 @@ export default function SignupPage() {
         className="bg-white p-8 rounded shadow-md w-full max-w-md"
       >
         <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
+        {signupSuccess ? (
+          <div className="bg-green-100 border border-green-400 text-green-700 p-4 rounded mb-6">
+            Sign-up successful! Check your email to confirm your address.
+          </div>
+        ) : (
+          <>
+            <input
+              type="email"
+              name="email"
+              placeholder="UofT Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full mb-4 px-4 py-2 border rounded"
+              required
+            />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="UofT Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded"
-          required
-        />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full mb-4 px-4 py-2 border rounded"
+              required
+            />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded"
-          required
-        />
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full mb-6 px-4 py-2 border rounded"
+              required
+            />
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          className="w-full mb-6 px-4 py-2 border rounded"
-          required
-        />
+            {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
-        >
-          {isSubmitting ? "Creating account..." : "Create Account"}
-        </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+            >
+              {isSubmitting ? "Creating account..." : "Create Account"}
+            </button>
+          </>
+        )}
 
         <Link href="/">
           <button
