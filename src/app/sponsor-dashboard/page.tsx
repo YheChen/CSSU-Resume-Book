@@ -1,4 +1,5 @@
 // app/sponsor-dashboard/page.tsx
+import ResumeTable, { Student } from "./ResumeTable";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
@@ -45,8 +46,8 @@ export default async function SponsorDashboard() {
   return (
     <main className="p-8">
       <h1 className="text-3xl font-bold mb-6">Sponsor Dashboard</h1>
-
-      <table className="min-w-full border">
+      <ResumeTable students={studentsWithResumes} />
+      {/* <table className="min-w-full border">
         <thead className="bg-gray-100">
           <tr>
             <th className="py-2 px-4 border">Resume</th>
@@ -129,7 +130,7 @@ export default async function SponsorDashboard() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
 
       {/* Logout button */}
       <section className="mt-8">
