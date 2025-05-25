@@ -88,7 +88,9 @@ export default function DashboardPage() {
       validationErrors.push("Preferred contact email is required.");
     if (!form.program) validationErrors.push("Program of study is required.");
     if (!form.year) validationErrors.push("Year of study is required.");
-
+    if (!resumeFile && !resumeUrl) {
+      validationErrors.push("Resume is required.");
+    }
     if (resumeFile) {
       if (resumeFile.type !== "application/pdf") {
         validationErrors.push("Resume must be a PDF file.");
