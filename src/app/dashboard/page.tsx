@@ -82,17 +82,67 @@ export default function DashboardPage() {
     }
 
     const validationErrors: string[] = [];
-    if (!form.name.trim()) validationErrors.push("Name is required.");
-    if (!form.contactEmail.trim())
+
+    // Name
+    if (!form.name.trim()) {
+      validationErrors.push("Name is required.");
+    } else if (form.name.length > 25) {
+      validationErrors.push("Name must be 25 characters or less");
+    }
+
+    // Email
+    if (!form.contactEmail.trim()) {
       validationErrors.push("Preferred contact email is required.");
-    if (!form.program) validationErrors.push("Program of study is required.");
-    if (!form.year) validationErrors.push("Year of study is required.");
+    } else {
+      const atCount = (form.contactEmail.match(/@/g) || []).length;
+      if (atCount !== 1) {
+        validationErrors.push("Email must contain exactly one '@'.");
+      } else if (form.contactEmail.length > 25) {
+        validationErrors.push("Email must be 25 characters or less.");
+      }
+    }
+
+    // Phone
+    if (form.phone && form.phone.length > 11) {
+      validationErrors.push("Phone number must be 11 digits or less");
+    }
+
+    // LinkedIn
+    if (form.linkedin) {
+      const li = form.linkedin;
+      if (li.length > 50) {
+        validationErrors.push("LinkedIn URL must be 50 characters or less");
+      }
+      // must start with linkedin.com/in/
+      else if (!/^https?:\/\/(www\.)?linkedin\.com\/in\/.+$/.test(li)) {
+        validationErrors.push("LinkedIn URL must start with linkedin.com/in/");
+      }
+    }
+
+    // GitHub
+    if (form.github) {
+      const gh = form.github;
+      if (gh.length > 50) {
+        validationErrors.push("GitHub URL must be 50 characters or less");
+      }
+      // must start with github.com/
+      else if (!/^https?:\/\/(www\.)?github\.com\/.+$/.test(gh)) {
+        validationErrors.push("GitHub URL must start with github.com/");
+      }
+    }
+
+    // Website
+    if (form.website && form.website.length > 50) {
+      validationErrors.push("Website URL must be 50 characters or less");
+    }
+
+    // Resume
     if (!resumeFile && !resumeUrl) {
       validationErrors.push("Resume is required.");
     }
     if (resumeFile) {
       if (resumeFile.type !== "application/pdf") {
-        validationErrors.push("Resume must be a PDF file.");
+        validationErrors.push("Resume must be a PDF.");
       } else if (resumeFile.size > 1024 * 1024) {
         validationErrors.push("Resume size must be under 1MB.");
       }
