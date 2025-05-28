@@ -14,7 +14,7 @@ export default function SignupPage() {
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [email, setEmailExists] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +65,7 @@ export default function SignupPage() {
       if (signUpError) throw signUpError;
 
       setSignupSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup error:", err);
       setError(err.message || "Unexpected signup error.");
     } finally {

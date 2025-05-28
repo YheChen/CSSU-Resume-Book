@@ -34,7 +34,7 @@ export default function LoginPage() {
       if (signInError) throw signInError;
 
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
       setError(err.message || "Unexpected login error.");
     } finally {
