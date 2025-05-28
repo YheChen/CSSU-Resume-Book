@@ -36,7 +36,13 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: unknown) {
       console.error("Login error:", err);
-      setError(err.message || "Unexpected login error.");
+      if (err && typeof err === "object" && "message" in err) {
+        setError(
+          (err as { message: string }).message || "Unexpected login error."
+        );
+      } else {
+        setError("Unexpected login error.");
+      }
     } finally {
       setIsSubmitting(false);
     }
