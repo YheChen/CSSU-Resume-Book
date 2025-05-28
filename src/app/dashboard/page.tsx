@@ -189,7 +189,13 @@ export default function DashboardPage() {
       setErrors([]);
     } catch (err: unknown) {
       console.error("Save failed:", err);
-      setStatus(`❌ ${err.message || "Unexpected error"}`);
+      setStatus(
+        `❌ ${
+          typeof err === "object" && err !== null && "message" in err
+            ? (err as { message?: string }).message
+            : "Unexpected error"
+        }`
+      );
     } finally {
       setIsSaving(false);
     }

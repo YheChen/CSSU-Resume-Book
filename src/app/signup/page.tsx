@@ -67,7 +67,11 @@ export default function SignupPage() {
       setSignupSuccess(true);
     } catch (err: unknown) {
       console.error("Signup error:", err);
-      setError(err.message || "Unexpected signup error.");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unexpected signup error.");
+      }
     } finally {
       setIsSubmitting(false);
     }
