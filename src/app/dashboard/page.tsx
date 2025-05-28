@@ -58,13 +58,13 @@ export default function DashboardPage() {
             }
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error fetching profile:", err);
       }
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, router]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -187,7 +187,7 @@ export default function DashboardPage() {
 
       setStatus("✅ Profile saved successfully.");
       setErrors([]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Save failed:", err);
       setStatus(`❌ ${err.message || "Unexpected error"}`);
     } finally {
@@ -199,7 +199,7 @@ export default function DashboardPage() {
     try {
       await supabase.auth.signOut();
       router.push("/");
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error logging out:", err);
     }
   };
